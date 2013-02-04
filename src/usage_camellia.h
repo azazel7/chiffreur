@@ -1,0 +1,1 @@
+void generer_clee(unsigned char *clee, int taille);
