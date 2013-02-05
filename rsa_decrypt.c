@@ -12,6 +12,7 @@
 #include "src/entropy.h"
 #include "src/ctr_drbg.h"
 #include "src/usage_camellia.h"
+#include "src/camellia.h"
 #include "src/clee_pub.h"
 
 int main( int argc, char *argv[] )

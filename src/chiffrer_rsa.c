@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "src/config.h"
 
-#include "src/rsa.h"
-#include "src/clee_pub.h"
-#include "src/entropy.h"
-#include "src/ctr_drbg.h"
+#include "config.h"
+#include "rsa.h"
+#include "clee_pub.h"
+#include "entropy.h"
+#include "ctr_drbg.h"
 
 int chiffrer_rsa(char data[32], char* sortie )
 {

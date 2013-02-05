@@ -8,13 +8,14 @@
 
 
 
-#include "src/config.h"
 
 #include "src/rsa.h"
 #include "src/entropy.h"
 #include "src/ctr_drbg.h"
 #include "src/usage_camellia.h"
+#include "src/camellia.h"
 #include "src/clee_pub.h"
+#include "src/config.h"
 
 int main( int argc, char *argv[] )
 {
@@ -24,6 +25,7 @@ int main( int argc, char *argv[] )
 		printf("Structure du fichier: <clee camellia><md5 originel (16)><IV (16)><Fichier>\n");
 		return 0;
 	}
+	int ret;
 	unsigned char IV[16] = {0}, IV_svg[16] = {0};
 	unsigned char md5[16] = {0};
 	unsigned char clee[32] = {0};
