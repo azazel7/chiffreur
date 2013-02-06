@@ -20,7 +20,7 @@ int main( int argc, char *argv[] )
 	if(argc != 2)
 	{
 		printf("Usage: %s <fichier in> <fichier out>\n", argv[0]);
-		printf("Structure du fichier: <clee camellia (32) + md5 (16) chiffré (%d) ><IV (16)><Fichier>\n", RSA_TAILLE/8);
+		printf("Structure du fichier: <Cryptogramme (%d) (camellia (32) + sha512(64) + IV (16)) ><Fichier>\n", RSA_TAILLE/8);
 		return 0;
 	}
 	int ret;
