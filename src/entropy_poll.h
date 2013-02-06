@@ -29,7 +29,7 @@
 
 #include <string.h>
 
-#include "config.h"
+#include "config_polarssl.h"
 
 #ifdef __cplusplus
 extern "C" {

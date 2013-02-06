@@ -29,7 +29,7 @@
  *  http://www.ietf.org/rfc/rfc1320.txt
  */
 
-#include "config.h"
+#include "config_polarssl.h"
 
 #if defined(POLARSSL_MD4_C)
 

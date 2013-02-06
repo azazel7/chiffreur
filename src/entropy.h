@@ -29,7 +29,7 @@
 
 #include <string.h>
 
-#include "config.h"
+#include "config_polarssl.h"
 
 #include "sha4.h"
 #if defined(POLARSSL_HAVEGE_C)

@@ -28,7 +28,7 @@
  *  http://csrc.nist.gov/publications/nistpubs/800-90/SP800-90revised_March2007.pdf
  */
 
-#include "config.h"
+#include "config_polarssl.h"
 
 #if defined(POLARSSL_CTR_DRBG_C)
 

@@ -28,7 +28,7 @@ int main( int argc, char *argv[] )
 	unsigned char clee[32] = {0};
 	unsigned char cryptogramme_clee[RSA_TAILLE/8] = {0};
 	unsigned char *fichier = NULL, *fichier_chiffre = NULL;
-    FILE *p_fichier = NULL, *sortie = NULL;
+	FILE *p_fichier = NULL, *sortie = NULL;
 	camellia_context camellia;
 	unsigned int taille;
 	printf("[i] Initialisation des IV\n");
@@ -55,53 +55,21 @@ int main( int argc, char *argv[] )
 	fseek(p_fichier, 0, SEEK_END);
 	taille = ftell(p_fichier);
 	rewind(p_fichier);
-	
-	printf("[i] Allocation de memoire pour les fichiers\n");
-	fichier = malloc( (taille + (16 - (taille%16))) * sizeof(unsigned char));//On genere une taille multiple de 16
-	fichier_chiffre = malloc( (taille + (16 - (taille%16))) * sizeof(unsigned char));
-	if(fichier == NULL || fichier_chiffre == NULL)
+	if((taille - RSA_TAILLE/8 - 16 - 166)%16 != 0)
 	{
-		printf("[-] Erreur d'allocation : %d octet(s)\n", (taille + (16 - (taille%16))) * 2 * sizeof(unsigned char));
+		printf("[-] Erreur de taille. Pas de multiple de 16.\n");
+	} 	
+	printf("[i] Allocation de memoire pour les fichiers\n");
+	fichier = malloc(taille * sizeof(unsigned char));//On genere le fichier  
+	fichier_dechiffre = malloc((taille - RSA_TAILLE/8 - 16 - 16) * sizeof(unsigned char));
+	if(fichier == NULL || fichier_dechiffre == NULL)
+	{
+		printf("[-] Erreur d'allocation : %d octet(s)\n", taille * sizeof(unsigned char));
 		return -1;
 	}
 	printf("[i] Lecture du fichier\n");
 	fread(fichier, taille, 1, p_fichier);
-	taille = (taille + (16 - (taille%16))); //On fixe la taille du tableau car la taille du fichier n'importe plus 
-	//On génére la clee camellia
-	printf("[i] Generation de la clee camellia\n");
-	generer_clee(clee, 32);
-	//on calcule le hash md5
-	printf("[i] Calcule du hash md5 du fichier\n");
-	md5_file( argv[1], md5);
-	//On chiffre le contenu du fichier
-	printf("[i] Chiffrement du fichier\n");
-	camellia_setkey_enc( &camellia, clee, 256);
-	camellia_crypt_cbc( &camellia, CAMELLIA_ENCRYPT, taille, IV, fichier, fichier_chiffre);
-	//On chiffre la clee camellia
-	printf("[i] Chiffrement de la clee camellia\n");
-	chiffrer_rsa(clee, cryptogramme_clee ); //TODO
-	//On ecrit le cryptogramme de la clee camellia
-	printf("[i] Ouverture du fichier de sortie: %s\n", argv[2]);
-	sortie = fopen(argv[2], "wb");
-	if(sortie == NULL)
-	{
-		printf("[-] Erreur d'ouverture de %s\n", argv[2]);
-		return -1;
-	}
-	printf("[i] Ecriture de la clee camellia chiffree\n");
-	fwrite(cryptogramme_clee, RSA_TAILLE/8, 1, sortie); //TODO
-	//On ecrit le hash md5
-	printf("[i] Ecriture du hash md5 du fichier\n");
-	fwrite(md5, 16, 1, sortie);
-	//On ecrit les IV
-	printf("[i] Ecriture des IV\n");
-	fwrite(IV_svg, 16, 1, sortie);
-	//On ecrit le fichier chiffre
-	printf("[i] Ecriture du fichier chiffre\n");
-	fwrite(fichier_chiffre, taille, 1, sortie);
-	
-	fclose(sortie);
-	fclose(p_fichier);
+	//TODO Associer à dechiffrer
 }
 
 void dechiffrer(unsigned char *fichier_chiffre, int taille)
@@ -110,9 +78,9 @@ void dechiffrer(unsigned char *fichier_chiffre, int taille)
 	unsigned char IV[16] = {0};
 	unsigned char md5_origine[16] = {0};
 	unsigned char md5_claire[16] = {0};
-	unsigned char sortie_rsa[
+	unsigned char cryptogramme_camellia[RSA_TAILLE/8] = {0};
 	//Allouer un tableau de taille - 4096/8 -16 - 16 pour le fichier clair
-	unsigned char *fichier_claire = malloc(sizeof(unsigned char) * (taille - 40096/8 -16 -16));
+	unsigned char *fichier_claire = malloc(sizeof(unsigned char) * (taille - RSA_TAILLE/8 -16 -16));
 	//recuperer cryptogramme clee camellia
 	
 	//recuperer md5

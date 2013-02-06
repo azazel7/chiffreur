@@ -9,8 +9,11 @@ EXEC=rsa_decrypt
 encrypt: $(OBJ)
 	${CC} rsa_encrypt.c $^ -o $@
 
+decrypt: $(OBJ)
+	${CC} rsa_decrypt.c $^ -o $@
+
 ${OBJDIR}/%.o: ${SRCDIR}/%.c
 	$(CC) -o $@ -c $<
 
 clean:
-	-rm encrypt
+	-rm encrypt decrypt

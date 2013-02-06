@@ -28,7 +28,7 @@
  *  http://www.ietf.org/rfc/rfc1321.txt
  */
 
-#include "config.h"
+#include "config_polarssl.h"
 
 #if defined(POLARSSL_MD5_C)
 

@@ -6,15 +6,13 @@
 #include <stdio.h>
 #include <time.h>
 
-
-
-
 #include "src/rsa.h"
 #include "src/entropy.h"
 #include "src/ctr_drbg.h"
 #include "src/usage_camellia.h"
 #include "src/camellia.h"
 #include "src/clee_pub.h"
+#include "src/config_polarssl.h"
 #include "src/config.h"
 
 int main( int argc, char *argv[] )
@@ -22,18 +20,26 @@ int main( int argc, char *argv[] )
 	if(argc != 2)
 	{
 		printf("Usage: %s <fichier in> <fichier out>\n", argv[0]);
-		printf("Structure du fichier: <clee camellia><md5 originel (16)><IV (16)><Fichier>\n");
+		printf("Structure du fichier: <clee camellia (32) + md5 (16) chiffré (%d) ><IV (16)><Fichier>\n", RSA_TAILLE/8);
 		return 0;
 	}
 	int ret;
-	unsigned char IV[16] = {0}, IV_svg[16] = {0};
-	unsigned char md5[16] = {0};
-	unsigned char clee[32] = {0};
+	unsigned char *IV_svg = NULL;
+	unsigned char IV[16] = {0};
+	unsigned char *md5 = NULL;
+	unsigned char *clee = NULL;
+	unsigned char achiffrer[ 32 + 16 + 16] = {0}; //Correspond aux données dont l'on souhaite empêcher la modification (clée camellia et md5 du fichier et IV)
 	unsigned char cryptogramme_clee[RSA_TAILLE/8] = {0};
 	unsigned char *fichier = NULL, *fichier_chiffre = NULL;
-    FILE *p_fichier = NULL, *sortie = NULL;
+	FILE *p_fichier = NULL, *sortie = NULL;
 	camellia_context camellia;
 	unsigned int taille;
+
+
+	clee = achiffrer;
+	md5 = achiffrer + 32;
+	IV_svg = achiffrer + 32 + 16;
+
 	printf("[i] Initialisation des IV\n");
 	ret = 1;
 	srand(time(NULL));
@@ -70,20 +76,27 @@ int main( int argc, char *argv[] )
 	printf("[i] Lecture du fichier\n");
 	fread(fichier, taille, 1, p_fichier);
 	taille = (taille + (16 - (taille%16))); //On fixe la taille du tableau car la taille du fichier n'importe plus 
+
 	//On génére la clee camellia
 	printf("[i] Generation de la clee camellia\n");
 	generer_clee(clee, 32);
+
 	//on calcule le hash md5
 	printf("[i] Calcule du hash md5 du fichier\n");
 	md5_file( argv[1], md5);
+
 	//On chiffre le contenu du fichier
 	printf("[i] Chiffrement du fichier\n");
 	camellia_setkey_enc( &camellia, clee, 256);
 	camellia_crypt_cbc( &camellia, CAMELLIA_ENCRYPT, taille, IV, fichier, fichier_chiffre);
+
 	//On chiffre la clee camellia
 	printf("[i] Chiffrement de la clee camellia\n");
-	chiffrer_rsa(clee, cryptogramme_clee ); //TODO
-	//On ecrit le cryptogramme de la clee camellia
+	memcpy(achiffrer, clee, 32);
+	memcpy(achiffrer+32, md5, 16);
+	chiffrer_rsa(achiffrer, cryptogramme_clee ); 
+
+	//On ecrit le cryptogramme
 	printf("[i] Ouverture du fichier de sortie: %s\n", argv[2]);
 	sortie = fopen(argv[2], "wb");
 	if(sortie == NULL)
@@ -91,11 +104,8 @@ int main( int argc, char *argv[] )
 		printf("[-] Erreur d'ouverture de %s\n", argv[2]);
 		return -1;
 	}
-	printf("[i] Ecriture de la clee camellia chiffree\n");
-	fwrite(cryptogramme_clee, RSA_TAILLE/8, 1, sortie); //TODO
-	//On ecrit le hash md5
-	printf("[i] Ecriture du hash md5 du fichier\n");
-	fwrite(md5, 16, 1, sortie);
+	printf("[i] Ecriture du cryptogramme (camellia + md5)\n");
+	fwrite(cryptogramme_clee, RSA_TAILLE/8, 1, sortie); 
 	//On ecrit les IV
 	printf("[i] Ecriture des IV\n");
 	fwrite(IV_svg, 16, 1, sortie);

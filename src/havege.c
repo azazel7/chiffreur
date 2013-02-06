@@ -30,7 +30,7 @@
  *  Contact: seznec(at)irisa_dot_fr - orocheco(at)irisa_dot_fr
  */
 
-#include "config.h"
+#include "config_polarssl.h"
 
 #if defined(POLARSSL_HAVEGE_C)
 
@@ -229,3 +229,4 @@ int havege_random( void *p_rng, unsigned char *buf, size_t len )
 }
 
 #endif
+

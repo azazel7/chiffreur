@@ -3,7 +3,8 @@
 #include <time.h>
 
 
-#include "config.h"
+//#include "config.h"
+#include "config_polarssl.h"
 #include "rsa.h"
 #include "clee_pub.h"
 #include "entropy.h"
@@ -17,8 +18,7 @@ int chiffrer_rsa(char data[32], char* sortie )
 	rsa_context rsa;
     entropy_context entropy;
     ctr_drbg_context ctr_drbg;
-    unsigned char input[1024];
-    unsigned char buf[512];
+    unsigned char buf[RSA_TAILLE/8];
     char *pers = "rsa_encrypt";
 	
     printf( "[i] Seeding the random number generator\n" );
@@ -45,7 +45,6 @@ int chiffrer_rsa(char data[32], char* sortie )
 
     rsa.len = ( mpi_msb( &rsa.N ) + 7 ) >> 3;
 
-    memcpy( input, data, 32);
 
     /*
      * Calculate the RSA encryption of the hash.
@@ -54,17 +53,15 @@ int chiffrer_rsa(char data[32], char* sortie )
     fflush( stdout );
 
     if( ( ret = rsa_pkcs1_encrypt( &rsa, ctr_drbg_random, &ctr_drbg,
-                                   RSA_PUBLIC, strlen( argv[1] ),
-                                   input, buf ) ) != 0 )
+                                   RSA_PUBLIC, 32,
+                                   data, buf ) ) != 0 )
     {
         printf( "[-] rsa_pkcs1_encrypt returned %d\n\n", ret );
         goto exit;
     }
-	memcpy( buf, sortie, 512);
+	memcpy( buf, sortie, RSA_TAILLE/8);
     printf( "[i] Cryptogramme copie\n");
 
 exit:
     return( ret );
 }
-#endif /* POLARSSL_BIGNUM_C && POLARSSL_RSA_C && POLARSSL_ENTROPY_C &&
-          POLARSSL_FS_IO && POLARSSL_CTR_DRBG_C */
