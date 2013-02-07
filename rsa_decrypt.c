@@ -72,9 +72,9 @@ void dechiffrer(unsigned char *fichier_chiffre, int taille)
 	camellia_context camellia;
 	//Allouer un tableau de taille- cryptogramme RSA pour le fichier clair
 	unsigned char *fichier_claire = malloc(sizeof(unsigned char) * (taille - RSA_TAILLE/8));
-	//recuperer cryptogramme clee camellia
+	//recuperer cryptogramme 
 	
-	//dechiffrer clee camellia
+	//dechiffrer le cryptogramme
 	
 	//Extrait les données du texte claire
 	clee_symetrique = data_dechiffre;
@@ -86,6 +86,12 @@ void dechiffrer(unsigned char *fichier_chiffre, int taille)
 	camellia_crypt_cbc( &camellia, CAMELLIA_DECRYPT, taille, IV, fichier, fichier_claire);
 	
 	//calculer hash  du fichier claire
+	sha4(fichier_claire, taille - TAILLE_CLEE_RSA/8, hash_claire, 0);	
 	
 	//comparer les hashs
+	if(memcmp(hash_origine, hash_claire, TAILLE_HASH/8) != 0)
+	{
+		//TODO erreur de hash
+	}
+		
 }
