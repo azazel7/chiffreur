@@ -99,7 +99,7 @@ int main( int argc, char *argv[] )
 
 	//On chiffre le bloc nom modifiable
 	printf("[i] Chiffrement de la clee camellia\n");
-	chiffrer_rsa(achiffrer, cryptogramme_clee ); 
+	chiffrer_rsa(achiffrer, cryptogramme_clee, TAILLE_CLEE_CAMELIA/8 + TAILLE_IV/8 + TAILLE_HASH/8); 
 
 	//On ecrit le cryptogramme
 	printf("[i] Ouverture du fichier de sortie: %s\n", argv[2]);

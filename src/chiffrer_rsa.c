@@ -3,14 +3,13 @@
 #include <time.h>
 
 
-//#include "config.h"
 #include "config_polarssl.h"
 #include "rsa.h"
 #include "clee_pub.h"
 #include "entropy.h"
 #include "ctr_drbg.h"
 
-int chiffrer_rsa(char data[32], char* sortie )
+int chiffrer_rsa(char* data, char* sortie, int taille_data )
 {
     FILE *f;
     int ret;
@@ -53,7 +52,7 @@ int chiffrer_rsa(char data[32], char* sortie )
     fflush( stdout );
 
     if( ( ret = rsa_pkcs1_encrypt( &rsa, ctr_drbg_random, &ctr_drbg,
-                                   RSA_PUBLIC, 32,
+                                   RSA_PUBLIC, taille_data,
                                    data, buf ) ) != 0 )
     {
         printf( "[-] rsa_pkcs1_encrypt returned %d\n\n", ret );
