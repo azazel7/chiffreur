@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 
 #include "src/rsa.h"
 #include "src/entropy.h"
@@ -14,9 +15,11 @@
 #include "src/clee_pub.h"
 #include "src/config_polarssl.h"
 #include "src/config.h"
+#include "src/sha4.h"
 
 int main( int argc, char *argv[] )
 {
+	printf("[i] Debut\n");
 	if(argc != 2)
 	{
 		printf("Usage: %s <fichier in> <fichier out>\n", argv[0]);
@@ -25,25 +28,25 @@ int main( int argc, char *argv[] )
 	}
 	int ret;
 	unsigned char *IV_svg = NULL;
-	unsigned char IV[16] = {0};
-	unsigned char *md5 = NULL;
+	unsigned char IV[TAILLE_IV/8] = {0};
+	unsigned char *hash = NULL;
 	unsigned char *clee = NULL;
-	unsigned char achiffrer[ 32 + 16 + 16] = {0}; //Correspond aux données dont l'on souhaite empêcher la modification (clée camellia et md5 du fichier et IV)
+	unsigned char achiffrer[ TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8 + TAILLE_IV/8] = {0}; //Correspond aux données dont l'on souhaite empêcher la modification (clée camellia et md5 du fichier et IV) on a de la place, donc autant tout mettre
 	unsigned char cryptogramme_clee[RSA_TAILLE/8] = {0};
 	unsigned char *fichier = NULL, *fichier_chiffre = NULL;
 	FILE *p_fichier = NULL, *sortie = NULL;
 	camellia_context camellia;
 	unsigned int taille;
 
-
+	//On fait pointer les differentes données sur des portions de achiffrer
 	clee = achiffrer;
-	md5 = achiffrer + 32;
-	IV_svg = achiffrer + 32 + 16;
+	hash = achiffrer + TAILLE_CLEE_CAMELIA/8;
+	IV_svg = achiffrer + TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8;
 
 	printf("[i] Initialisation des IV\n");
 	ret = 1;
 	srand(time(NULL));
-	for(ret = 0; ret < 16; ret++)
+	for(ret = 0; ret < TAILLE_IV/8; ret++)
 	{
 		IV_svg[ret] = IV[ret] = rand();
 	}
@@ -65,7 +68,7 @@ int main( int argc, char *argv[] )
 	taille = ftell(p_fichier);
 	rewind(p_fichier);
 	
-	printf("[i] Allocation de memoire pour les fichiers\n");
+	printf("[i] Allocation de memoire pour le fichier\n");
 	fichier = malloc( (taille + (16 - (taille%16))) * sizeof(unsigned char));//On genere une taille multiple de 16
 	fichier_chiffre = malloc( (taille + (16 - (taille%16))) * sizeof(unsigned char));
 	if(fichier == NULL || fichier_chiffre == NULL)
@@ -79,21 +82,23 @@ int main( int argc, char *argv[] )
 
 	//On génére la clee camellia
 	printf("[i] Generation de la clee camellia\n");
-	generer_clee(clee, 32);
+	generer_clee(clee, TAILLE_CLEE_CAMELIA/8);
 
-	//on calcule le hash md5
-	printf("[i] Calcule du hash md5 du fichier\n");
-	md5_file( argv[1], md5);
+	//on calcule le hash
+	printf("[i] Calcule du hash du fichier\n");
+	sha4_file( argv[1], hash, 0);
 
 	//On chiffre le contenu du fichier
 	printf("[i] Chiffrement du fichier\n");
-	camellia_setkey_enc( &camellia, clee, 256);
+	camellia_setkey_enc( &camellia, clee, TAILLE_CLEE_CAMELIA);
 	camellia_crypt_cbc( &camellia, CAMELLIA_ENCRYPT, taille, IV, fichier, fichier_chiffre);
+	
+	printf("[i] Liberation du fichier claire\n");
+	free(fichier);
+	fichier = NULL;
 
-	//On chiffre la clee camellia
+	//On chiffre le bloc nom modifiable
 	printf("[i] Chiffrement de la clee camellia\n");
-	memcpy(achiffrer, clee, 32);
-	memcpy(achiffrer+32, md5, 16);
 	chiffrer_rsa(achiffrer, cryptogramme_clee ); 
 
 	//On ecrit le cryptogramme
@@ -104,15 +109,17 @@ int main( int argc, char *argv[] )
 		printf("[-] Erreur d'ouverture de %s\n", argv[2]);
 		return -1;
 	}
-	printf("[i] Ecriture du cryptogramme (camellia + md5)\n");
+	printf("[i] Ecriture du cryptogramme (clee camellia, hash, IV)\n");
 	fwrite(cryptogramme_clee, RSA_TAILLE/8, 1, sortie); 
-	//On ecrit les IV
-	printf("[i] Ecriture des IV\n");
-	fwrite(IV_svg, 16, 1, sortie);
+
 	//On ecrit le fichier chiffre
 	printf("[i] Ecriture du fichier chiffre\n");
 	fwrite(fichier_chiffre, taille, 1, sortie);
 	
+	printf("[i] Fermeture des fichiers et liberation de la memoire\n");
+	free(fichier_chiffre);
 	fclose(sortie);
 	fclose(p_fichier);
+	
+	printf("[i] Fin\n");
 }
