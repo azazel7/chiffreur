@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 
-
+#include "config.h"
 #include "config_polarssl.h"
 #include "rsa.h"
 #include "clee_pub.h"
@@ -17,7 +17,7 @@ int chiffrer_rsa(char* data, char* sortie, int taille_data )
 	rsa_context rsa;
     entropy_context entropy;
     ctr_drbg_context ctr_drbg;
-    unsigned char buf[RSA_TAILLE/8];
+    unsigned char buf[TAILLE_CLEE_RSA/8];
     char *pers = "rsa_encrypt";
 	
     printf( "[i] Seeding the random number generator\n" );
@@ -58,7 +58,7 @@ int chiffrer_rsa(char* data, char* sortie, int taille_data )
         printf( "[-] rsa_pkcs1_encrypt returned %d\n\n", ret );
         goto exit;
     }
-	memcpy( buf, sortie, RSA_TAILLE/8);
+	memcpy( buf, sortie, TAILLE_CLEE_RSA/8);
     printf( "[i] Cryptogramme copie\n");
 
 exit:

@@ -17,6 +17,8 @@
 #include "src/config.h"
 #include "src/sha4.h"
 
+void affiche_existe(unsigned char* tableau, unsigned int taille);
+
 int main( int argc, char *argv[] )
 {
 	printf("[i] Debut\n");
@@ -31,32 +33,34 @@ int main( int argc, char *argv[] )
 	unsigned char IV[TAILLE_IV/8] = {0};
 	unsigned char *hash = NULL;
 	unsigned char *clee = NULL;
-	unsigned char achiffrer[ TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8 + TAILLE_IV/8] = {0}; //Correspond aux données dont l'on souhaite empêcher la modification (clée camellia et md5 du fichier et IV) on a de la place, donc autant tout mettre
-	unsigned char cryptogramme_clee[RSA_TAILLE/8] = {0};
+	unsigned char achiffrer[TAILLE_CLEE_RSA/8 ] = {0}; //Correspond aux données dont l'on souhaite empêcher la modification (clée camellia et md5 du fichier et IV) on a de la place, donc autant tout mettre
+	unsigned char cryptogramme_clee[TAILLE_CLEE_RSA/8] = {0};
 	unsigned char *fichier = NULL, *fichier_chiffre = NULL;
 	FILE *p_fichier = NULL, *sortie = NULL;
 	camellia_context camellia;
 	unsigned int taille;
 
 	//On fait pointer les differentes données sur des portions de achiffrer
-	clee = achiffrer;
-	hash = achiffrer + TAILLE_CLEE_CAMELIA/8;
-	IV_svg = achiffrer + TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8;
+	//clee = achiffrer;
+	//hash = achiffrer + TAILLE_CLEE_CAMELIA/8;
+	//IV_svg = achiffrer + TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8;
 
-	printf("[i] Initialisation des IV\n");
+	//printf("[i] Initialisation des IV\n");
 	ret = 1;
 	srand(time(NULL));
-	for(ret = 0; ret < TAILLE_IV/8; ret++)
-	{
-		IV_svg[ret] = IV[ret] = rand();
-	}
+	//for(ret = 0; ret < TAILLE_IV/8; ret++)
+	//{
+	//		IV_svg[ret] = IV[ret] = 87;
+	//}
+	//IV_svg[15] = IV[15] = 0;
+	//printf("[i] IV: %s\n", IV);
 	ret = 1;
 	//Argument, le fichier
 	//Recuperer la clee camellia pour dechiffrer la clee rsa
 	//dechiffre la clee public
 	
 	//On map le fichier en memoire
-	printf("[i] Lecture de la taille du fichier %s\n", argv[1]);
+	/*printf("[i] Lecture de la taille du fichier %s\n", argv[1]);
 	p_fichier = fopen(argv[1], "rb");
 	if(p_fichier == NULL)
 	{
@@ -84,9 +88,10 @@ int main( int argc, char *argv[] )
 	printf("[i] Generation de la clee camellia\n");
 	generer_clee(clee, TAILLE_CLEE_CAMELIA/8);
 
+	printf("[i] Clee camellia : %s\n", clee);
 	//on calcule le hash
 	printf("[i] Calcule du hash du fichier\n");
-	sha4_file( argv[1], hash, 0);
+	sha4( fichier, taille, hash, 0);
 
 	//On chiffre le contenu du fichier
 	printf("[i] Chiffrement du fichier\n");
@@ -96,11 +101,15 @@ int main( int argc, char *argv[] )
 	printf("[i] Liberation du fichier claire\n");
 	free(fichier);
 	fichier = NULL;
-
+	*/
 	//On chiffre le bloc nom modifiable
 	printf("[i] Chiffrement de la clee camellia\n");
-	chiffrer_rsa(achiffrer, cryptogramme_clee, TAILLE_CLEE_CAMELIA/8 + TAILLE_IV/8 + TAILLE_HASH/8); 
-
+	//chiffrer_rsa(achiffrer, cryptogramme_clee, TAILLE_CLEE_CAMELIA/8 + TAILLE_IV/8 + TAILLE_HASH/8); 
+	sprintf(achiffrer, "My Little Pony");
+	chiffrer_rsa(achiffrer, cryptogramme_clee, (TAILLE_CLEE_RSA/8) - 30); 
+	unsigned char dechiffre[TAILLE_CLEE_RSA/8] = {0};
+	dechiffrer_rsa(cryptogramme_clee, (TAILLE_CLEE_RSA/8)-30, dechiffre, TAILLE_CLEE_RSA/8);
+	printf("[i] data: %s\n", dechiffre);
 	//On ecrit le cryptogramme
 	printf("[i] Ouverture du fichier de sortie: %s\n", argv[2]);
 	sortie = fopen(argv[2], "wb");
@@ -109,17 +118,27 @@ int main( int argc, char *argv[] )
 		printf("[-] Erreur d'ouverture de %s\n", argv[2]);
 		return -1;
 	}
-	printf("[i] Ecriture du cryptogramme (clee camellia, hash, IV)\n");
-	fwrite(cryptogramme_clee, RSA_TAILLE/8, 1, sortie); 
+	printf("[i] Ecriture du cryptogramme (clee camellia, hash, IV) : %d\n", TAILLE_CLEE_RSA/8);
+	fwrite(cryptogramme_clee, TAILLE_CLEE_RSA/8, 1, sortie); 
 
 	//On ecrit le fichier chiffre
-	printf("[i] Ecriture du fichier chiffre\n");
-	fwrite(fichier_chiffre, taille, 1, sortie);
+	//printf("[i] Ecriture du fichier chiffre\n");
+	//fwrite(fichier_chiffre, taille, 1, sortie);
 	
-	printf("[i] Fermeture des fichiers et liberation de la memoire\n");
-	free(fichier_chiffre);
-	fclose(sortie);
-	fclose(p_fichier);
+	//printf("[i] Fermeture des fichiers et liberation de la memoire\n");
+	//free(fichier_chiffre);
+	//fclose(sortie);
+	//fclose(p_fichier);
 	
 	printf("[i] Fin\n");
+}
+
+
+void affiche_existe(unsigned char* tableau, unsigned int taille)
+{
+	unsigned int i = 0;
+	for(; i < taille; i++)
+	{
+		printf("%02X", tableau[i]);
+	}
 }

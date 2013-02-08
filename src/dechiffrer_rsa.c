@@ -38,6 +38,7 @@ int dechiffrer_rsa(char* cryptogramme, int taille_cryptogramme, char* sortie, in
 	{
 		return ERREUR;
 	}
+	printf("[i] Taille crypto : %d\n", taille_cryptogramme);
 	return SUCCES;
 }
 

@@ -84,35 +84,36 @@ unsigned char* dechiffrer(unsigned char *fichier_chiffre, int taille)
 	unsigned char *hash_origine = NULL;
 	unsigned char hash_claire[TAILLE_HASH/8] = {0};
 	unsigned char *cryptogramme_rsa = NULL;
-	unsigned char data_dechiffre[TAILLE_CLEE_RSA/8] = {0};
+	unsigned char data_dechiffre[(TAILLE_CLEE_RSA/8) + 30] = {0};
 	unsigned char *fichier = fichier_chiffre + TAILLE_CLEE_RSA/8;
 	unsigned char *fichier_claire = NULL;
 	char ret;
 	camellia_context camellia;
-	//Allouer un tableau de taille- cryptogramme RSA pour le fichier clair
-	
-
 	//recuperer cryptogramme 
 	cryptogramme_rsa = fichier_chiffre;
 	
 	//dechiffrer le cryptogramme
 	printf("[i] Dechiffrement du cryptogramme RSA\n");
-	ret = dechiffrer_rsa(cryptogramme_rsa, TAILLE_CLEE_RSA/8, data_dechiffre, TAILLE_CLEE_RSA/8);
+	ret = dechiffrer_rsa(cryptogramme_rsa, (TAILLE_CLEE_RSA/8)-30, data_dechiffre, (TAILLE_CLEE_RSA/8) + 30);
 	if(ret == ERREUR)
 	{
 		printf("[-] Le dechiffrement a pose une erreur\n");
 	}	
+	printf("[i] Clee : %s\n", data_dechiffre);
 	//Extrait les données du texte claire
-	printf("[i] Association des donnees\n");
+	/*printf("[i] Association des donnees\n");
 	clee_symetrique = data_dechiffre;
 	hash_origine = data_dechiffre + TAILLE_CLEE_CAMELIA/8;
 	IV = data_dechiffre + TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8;
 
+	printf("[i] Clee trouvee: %s\n", clee_symetrique);
+	printf("[i] IV trouvee: %s\n", IV);
+ 
 	//dechiffrer fichier
 	printf("[i] Dechiffrement du fichier avec la clee symetrique\n");
 	fichier_claire = malloc(sizeof(unsigned char) * (taille - RSA_TAILLE/8));
 	camellia_setkey_dec( &camellia, clee_symetrique, TAILLE_CLEE_CAMELIA);
-	ret = camellia_crypt_cbc( &camellia, CAMELLIA_DECRYPT, taille, IV, fichier, fichier_claire);
+	ret = camellia_crypt_cbc( &camellia, CAMELLIA_DECRYPT, taille - TAILLE_CLEE_RSA/8, IV, fichier, fichier_claire);
 	if(ret != 0)
 	{
 		printf("[-] Le dechiffrement a pose une erreur\n");
@@ -129,6 +130,6 @@ unsigned char* dechiffrer(unsigned char *fichier_chiffre, int taille)
 		printf("[-] Les hash ne correspondent pas\n");
 		free(fichier_claire);
 		return NULL;
-	}
-	return fichier_claire;	
+	}*/
+	return NULL;	
 }

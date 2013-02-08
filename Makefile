@@ -10,7 +10,7 @@ encrypt: $(OBJ)
 	${CC} rsa_encrypt.c $^ -o $@
 
 decrypt: $(OBJ)
-	${CC} rsa_decrypt.c $^ -o $@
+	${CC} rsa_decrypt.c $^ -o $@ -g
 
 ${OBJDIR}/%.o: ${SRCDIR}/%.c
 	$(CC) -o $@ -c $<
