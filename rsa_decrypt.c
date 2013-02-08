@@ -17,10 +17,12 @@
 #include "src/clee_pub.h"
 #include "src/sha4.h"
 
+unsigned char* dechiffrer(unsigned char *fichier_chiffre, int taille);
+
 int main( int argc, char *argv[] )
 {
 	printf("[i] Debut\n");
-	if(argc != 2)
+	if(argc != 3)
 	{
 		printf("Usage: %s <fichier in> <fichier out>\n", argv[0]);
 		printf("Structure du fichier: <Cryptogramme (%d) (camellia (32) + sha512(64) + IV (16)) ><Fichier>\n", RSA_TAILLE/8);
@@ -30,7 +32,7 @@ int main( int argc, char *argv[] )
 	FILE *p_fichier = NULL, *sortie = NULL;
 	camellia_context camellia;
 	unsigned int taille;
-	
+	unsigned char *fichier_claire = NULL;
 	//On map le fichier en memoire
 	printf("[i] Lecture de la taille du fichier %s\n", argv[1]);
 	p_fichier = fopen(argv[1], "rb");
@@ -46,21 +48,36 @@ int main( int argc, char *argv[] )
 	if((taille - RSA_TAILLE/8)%16 != 0)
 	{
 		printf("[-] Erreur de taille. Pas de multiple de 16.\n");
+		return -1;
 	} 	
 	printf("[i] Allocation de memoire pour les fichiers\n");
 	fichier = malloc(taille * sizeof(unsigned char));//On genere le fichier  
-	fichier_dechiffre = malloc((taille - RSA_TAILLE/8) * sizeof(unsigned char));
-	if(fichier == NULL || fichier_dechiffre == NULL)
+	if(fichier == NULL)
 	{
 		printf("[-] Erreur d'allocation : %d octet(s)\n", taille * sizeof(unsigned char));
 		return -1;
 	}
 	printf("[i] Lecture du fichier\n");
 	fread(fichier, taille, 1, p_fichier);
-	//TODO Associer à dechiffrer
+	fclose(p_fichier);
+	
+	fichier_claire = dechiffrer(fichier, taille);
+	if(fichier_claire != NULL)
+	{
+		int i;
+		printf("[i] Contenu du fichier: ");
+		for(i =0; i < 10; i++)
+		{
+			printf("%c", fichier_claire[i]);
+		}
+		printf("\n");
+		free(fichier_claire);
+	}
+	printf("Titi\n");
+	free(fichier);
 }
 
-void dechiffrer(unsigned char *fichier_chiffre, int taille)
+unsigned char* dechiffrer(unsigned char *fichier_chiffre, int taille)
 {
 	unsigned char *clee_symetrique = NULL;
 	unsigned char *IV = NULL;
@@ -69,29 +86,49 @@ void dechiffrer(unsigned char *fichier_chiffre, int taille)
 	unsigned char *cryptogramme_rsa = NULL;
 	unsigned char data_dechiffre[TAILLE_CLEE_RSA/8] = {0};
 	unsigned char *fichier = fichier_chiffre + TAILLE_CLEE_RSA/8;
+	unsigned char *fichier_claire = NULL;
+	char ret;
 	camellia_context camellia;
 	//Allouer un tableau de taille- cryptogramme RSA pour le fichier clair
-	unsigned char *fichier_claire = malloc(sizeof(unsigned char) * (taille - RSA_TAILLE/8));
+	
+
 	//recuperer cryptogramme 
+	cryptogramme_rsa = fichier_chiffre;
 	
 	//dechiffrer le cryptogramme
-	
+	printf("[i] Dechiffrement du cryptogramme RSA\n");
+	ret = dechiffrer_rsa(cryptogramme_rsa, TAILLE_CLEE_RSA/8, data_dechiffre, TAILLE_CLEE_RSA/8);
+	if(ret == ERREUR)
+	{
+		printf("[-] Le dechiffrement a pose une erreur\n");
+	}	
 	//Extrait les données du texte claire
+	printf("[i] Association des donnees\n");
 	clee_symetrique = data_dechiffre;
 	hash_origine = data_dechiffre + TAILLE_CLEE_CAMELIA/8;
 	IV = data_dechiffre + TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8;
 
 	//dechiffrer fichier
+	printf("[i] Dechiffrement du fichier avec la clee symetrique\n");
+	fichier_claire = malloc(sizeof(unsigned char) * (taille - RSA_TAILLE/8));
 	camellia_setkey_dec( &camellia, clee_symetrique, TAILLE_CLEE_CAMELIA);
-	camellia_crypt_cbc( &camellia, CAMELLIA_DECRYPT, taille, IV, fichier, fichier_claire);
-	
+	ret = camellia_crypt_cbc( &camellia, CAMELLIA_DECRYPT, taille, IV, fichier, fichier_claire);
+	if(ret != 0)
+	{
+		printf("[-] Le dechiffrement a pose une erreur\n");
+		free(fichier_claire);
+		return NULL;
+	}
 	//calculer hash  du fichier claire
+	printf("[i] Calcule du hash\n");
 	sha4(fichier_claire, taille - TAILLE_CLEE_RSA/8, hash_claire, 0);	
-	
 	//comparer les hashs
+	printf("[i] Comparaison des hash\n");
 	if(memcmp(hash_origine, hash_claire, TAILLE_HASH/8) != 0)
 	{
-		//TODO erreur de hash
+		printf("[-] Les hash ne correspondent pas\n");
+		free(fichier_claire);
+		return NULL;
 	}
-		
+	return fichier_claire;	
 }

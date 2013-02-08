@@ -20,7 +20,7 @@
 int main( int argc, char *argv[] )
 {
 	printf("[i] Debut\n");
-	if(argc != 2)
+	if(argc != 3)
 	{
 		printf("Usage: %s <fichier in> <fichier out>\n", argv[0]);
 		printf("Structure du fichier: <Cryptogramme (%d) (camellia (32) + sha512(64) + IV (16)) ><Fichier>\n", RSA_TAILLE/8);
