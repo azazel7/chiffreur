@@ -106,20 +106,21 @@ int main( int argc, char *argv[] )
 	printf("[i] Chiffrement de la clee camellia\n");
 	//chiffrer_rsa(achiffrer, cryptogramme_clee, TAILLE_CLEE_CAMELIA/8 + TAILLE_IV/8 + TAILLE_HASH/8); 
 	sprintf(achiffrer, "My Little Pony");
-	chiffrer_rsa(achiffrer, cryptogramme_clee, (TAILLE_CLEE_RSA/8) - 30); 
-	unsigned char dechiffre[TAILLE_CLEE_RSA/8] = {0};
-	dechiffrer_rsa(cryptogramme_clee, (TAILLE_CLEE_RSA/8)-30, dechiffre, TAILLE_CLEE_RSA/8);
+	chiffrer_rsa(achiffrer, cryptogramme_clee, strlen("My Little Pony")); 
+	unsigned char dechiffre[TAILLE_CLEE_RSA] = {0};
+	printf("[i] Dechiffrement en cour ...\n");
+	dechiffrer_rsa(cryptogramme_clee, (TAILLE_CLEE_RSA/8), dechiffre, TAILLE_CLEE_RSA); //FIXME La fonction ne fonctionne pas !!!
 	printf("[i] data: %s\n", dechiffre);
 	//On ecrit le cryptogramme
-	printf("[i] Ouverture du fichier de sortie: %s\n", argv[2]);
-	sortie = fopen(argv[2], "wb");
-	if(sortie == NULL)
-	{
-		printf("[-] Erreur d'ouverture de %s\n", argv[2]);
-		return -1;
-	}
-	printf("[i] Ecriture du cryptogramme (clee camellia, hash, IV) : %d\n", TAILLE_CLEE_RSA/8);
-	fwrite(cryptogramme_clee, TAILLE_CLEE_RSA/8, 1, sortie); 
+	//printf("[i] Ouverture du fichier de sortie: %s\n", argv[2]);
+	//sortie = fopen(argv[2], "wb");
+	//if(sortie == NULL)
+	//{
+	//	printf("[-] Erreur d'ouverture de %s\n", argv[2]);
+	//	return -1;
+	//}
+	//printf("[i] Ecriture du cryptogramme (clee camellia, hash, IV) : %d\n", TAILLE_CLEE_RSA/8);
+	//fwrite(cryptogramme_clee, TAILLE_CLEE_RSA/8, 1, sortie); 
 
 	//On ecrit le fichier chiffre
 	//printf("[i] Ecriture du fichier chiffre\n");

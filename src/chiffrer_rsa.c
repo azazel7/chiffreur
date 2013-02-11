@@ -48,17 +48,17 @@ int chiffrer_rsa(char* data, char* sortie, int taille_data )
     /*
      * Calculate the RSA encryption of the hash.
      */
-    printf( "[i] Generating the RSA encrypted value\n" );
+    printf( "[i] Generating the RSA encrypted value (%d/%d)\n", rsa.len, taille_data );
     fflush( stdout );
 
     if( ( ret = rsa_pkcs1_encrypt( &rsa, ctr_drbg_random, &ctr_drbg,
                                    RSA_PUBLIC, taille_data,
-                                   data, buf ) ) != 0 )
+                                   data, sortie ) ) != 0 )
     {
         printf( "[-] rsa_pkcs1_encrypt returned %d\n\n", ret );
         goto exit;
     }
-	memcpy( buf, sortie, TAILLE_CLEE_RSA/8);
+	//memcpy( buf, sortie, TAILLE_CLEE_RSA/8);
     printf( "[i] Cryptogramme copie\n");
 
 exit:

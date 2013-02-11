@@ -19,23 +19,27 @@ int dechiffrer_rsa(char* cryptogramme, int taille_cryptogramme, char* sortie, in
 	erreur = mpi_read_string( &rsa.N, RSA_N_BASE, RSA_N);
 	if(erreur != 0)
 	{
+		printf("[-] Erreur lecture du N : %d\n", erreur);	
 		return ERREUR;
 	}
 	erreur = mpi_read_string( &rsa.D, RSA_D_BASE, RSA_D);
 	if(erreur != 0)
 	{
+		printf("[-] Erreur lecture du D : %d\n", erreur);	
 		return ERREUR;
 	}
 	//On verifie les clee
 	rsa.len = ( mpi_msb( &rsa.N ) + 7 ) >> 3;
 	if(taille_cryptogramme != rsa.len)
 	{
+		printf("[-] Erreur de taille : %d/%d\n", rsa.len, taille_cryptogramme);	
 		return ERREUR;
 	}
 	//On dechiffre le cryptogramme
-	erreur = rsa_pkcs1_decrypt( &rsa, RSA_PRIVATE, &taille_cryptogramme, cryptogramme, sortie, taille_sortie );
+	erreur = rsa_pkcs1_decrypt( &rsa, RSA_PRIVATE, &taille_cryptogramme, cryptogramme, sortie, TAILLE_CLEE_RSA );
 	if(erreur != 0)
 	{
+		printf("[-] Erreur de dechiffrement : %d\n", erreur);	
 		return ERREUR;
 	}
 	printf("[i] Taille crypto : %d\n", taille_cryptogramme);
