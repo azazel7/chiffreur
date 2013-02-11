@@ -6,6 +6,7 @@
 #include "config_polarssl.h"
 #include "rsa.h"
 #include "clee_priv.h"
+#include "clee_pub.h"
 #include "entropy.h"
 #include "ctr_drbg.h"
 
@@ -22,7 +23,7 @@ int dechiffrer_rsa(char* cryptogramme, int taille_cryptogramme, char* sortie, in
 		printf("[-] Erreur lecture du N : %d\n", erreur);	
 		return ERREUR;
 	}
-	erreur = mpi_read_string( &rsa.D, RSA_D_BASE, RSA_D);
+	erreur = mpi_read_string( &rsa.E, RSA_E_BASE, RSA_E);
 	if(erreur != 0)
 	{
 		printf("[-] Erreur lecture du D : %d\n", erreur);	
@@ -36,7 +37,7 @@ int dechiffrer_rsa(char* cryptogramme, int taille_cryptogramme, char* sortie, in
 		return ERREUR;
 	}
 	//On dechiffre le cryptogramme
-	erreur = rsa_pkcs1_decrypt( &rsa, RSA_PRIVATE, &taille_cryptogramme, cryptogramme, sortie, taille_sortie);
+	erreur = rsa_pkcs1_decrypt( &rsa, RSA_PUBLIC, &taille_cryptogramme, cryptogramme, sortie, taille_sortie);
 	if(erreur != 0)
 	{
 		printf("[-] Erreur de dechiffrement : %d\n", erreur);	
