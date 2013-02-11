@@ -5,10 +5,8 @@ void generer_clee(unsigned char *clee, int taille)
 	int i;
 	for(i = 0; i < taille; i++)
 	{
-		clee[i] = 84;
+		clee[i] = rand();
 	}
-	clee[taille - 1] = 0;
-	
 /*
 	//Ouvrir /dev/random
 	FILE* file_random = fopen("/dev/random", "rb");

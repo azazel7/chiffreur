@@ -105,9 +105,6 @@ unsigned char* dechiffrer(unsigned char *fichier_chiffre, int taille)
 	hash_origine = data_dechiffre + TAILLE_CLEE_CAMELIA/8;
 	IV = data_dechiffre + TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8;
 
-	printf("[i] Clee trouvee: %s\n", clee_symetrique);
-	printf("[i] IV trouvee: %s\n", IV);
- 
 	//dechiffrer fichier
 	printf("[i] Dechiffrement du fichier avec la clee symetrique\n");
 	fichier_claire = malloc(sizeof(unsigned char) * (taille - RSA_TAILLE/8));

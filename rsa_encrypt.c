@@ -45,15 +45,13 @@ int main( int argc, char *argv[] )
 	hash = achiffrer + TAILLE_CLEE_CAMELIA/8;
 	IV_svg = achiffrer + TAILLE_CLEE_CAMELIA/8 + TAILLE_HASH/8;
 
-	//printf("[i] Initialisation des IV\n");
+	printf("[i] Initialisation des IV\n");
 	ret = 1;
 	srand(time(NULL));
 	for(ret = 0; ret < TAILLE_IV/8; ret++)
 	{
-			IV_svg[ret] = IV[ret] = 87;
+			IV_svg[ret] = IV[ret] = rand();
 	}
-	IV_svg[15] = IV[15] = 0;
-	printf("[i] IV: %s\n", IV);
 	ret = 1;
 	//Argument, le fichier
 	//Recuperer la clee camellia pour dechiffrer la clee rsa
@@ -88,7 +86,6 @@ int main( int argc, char *argv[] )
 	printf("[i] Generation de la clee camellia\n");
 	generer_clee(clee, TAILLE_CLEE_CAMELIA/8);
 
-	printf("[i] Clee camellia : %s\n", clee);
 	//on calcule le hash
 	printf("[i] Calcule du hash du fichier\n");
 	sha4( fichier, taille, hash, 0);
@@ -104,7 +101,7 @@ int main( int argc, char *argv[] )
 	
 	//On chiffre le bloc nom modifiable
 	printf("[i] Chiffrement de la clee camellia\n");
-	chiffrer_rsa(achiffrer, cryptogramme_clee, (TAILLE_CLEE_RSA/8) - 30); 
+	chiffrer_rsa(achiffrer, cryptogramme_clee, (TAILLE_CLEE_RSA/8) - 11); 
 	
 	//On ecrit le cryptogramme
 	printf("[i] Ouverture du fichier de sortie: %s\n", argv[2]);
