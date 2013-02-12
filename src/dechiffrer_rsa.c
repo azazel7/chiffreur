@@ -5,7 +5,6 @@
 #include "config.h"
 #include "config_polarssl.h"
 #include "rsa.h"
-#include "clee_priv.h"
 #include "clee_pub.h"
 #include "entropy.h"
 #include "ctr_drbg.h"

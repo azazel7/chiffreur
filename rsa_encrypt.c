@@ -53,10 +53,6 @@ int main( int argc, char *argv[] )
 			IV_svg[ret] = IV[ret] = rand();
 	}
 	ret = 1;
-	//Argument, le fichier
-	//Recuperer la clee camellia pour dechiffrer la clee rsa
-	//dechiffre la clee public
-	
 	//On map le fichier en memoire
 	printf("[i] Lecture de la taille du fichier %s\n", argv[1]);
 	p_fichier = fopen(argv[1], "rb");

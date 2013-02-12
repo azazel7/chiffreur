@@ -127,5 +127,5 @@ unsigned char* dechiffrer(unsigned char *fichier_chiffre, int taille)
 		free(fichier_claire);
 		return NULL;
 	}
-	return NULL;	
+	return fichier_claire;	
 }

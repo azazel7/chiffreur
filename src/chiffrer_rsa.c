@@ -5,7 +5,6 @@
 #include "config.h"
 #include "config_polarssl.h"
 #include "rsa.h"
-#include "clee_pub.h"
 #include "clee_priv.h"
 #include "entropy.h"
 #include "ctr_drbg.h"
@@ -30,7 +29,7 @@ int chiffrer_rsa(char* data, char* sortie, int taille_data )
         goto exit;
     }
 
-    printf( "[i] Reading public key\n" );
+    printf( "[i] Reading private key\n" );
 
 
     rsa_init( &rsa, RSA_PKCS_V15, 0 );
